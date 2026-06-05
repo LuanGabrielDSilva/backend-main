@@ -1,0 +1,280 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String        @id @default(uuid())
+  name                String
+  email               String        @unique
+  password            String
+  created_at          DateTime?     @default(now())
+  updated_at          DateTime?     @default(now())
+  role                String        @default("user")
+  balance             Float         @default(0)
+  coins               Int           @default(0)
+  bairro              String?
+  cep                 String?
+  cidade              String?
+  complemento         String?
+  estado              String?
+  numero              String?
+  rua                 String?
+  reset_token         String?
+  reset_token_expires DateTime?
+  expeditions         Expedition[]
+  gameResults         GameResult[]
+  inventory           Inventory[]
+  orders              Order[]
+  quizResults         QuizResult[]
+  transactions        Transaction[]
+  carts               Cart[]
+  comments            Comment[]
+  favorites           Favorite[]
+
+  @@map("users")
+}
+
+model Transaction {
+  id         String   @id @default(uuid())
+  userId     String
+  type       String
+  amount     Int
+  source     String
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Game {
+  id         String       @id @default(uuid())
+  name       String
+  slug       String
+  baseCoins  Int          @default(100)
+  created_at DateTime     @default(now())
+  results    GameResult[]
+}
+
+model Animal {
+  id             String             @id @default(uuid())
+  name           String
+  type           String
+  size           String?
+  image          String?
+  created_at     DateTime           @default(now())
+  periodoId      String
+  dieta          String?
+  description    String?
+  clima          String?
+  descoberta     String?
+  habitat        String?
+  local          String?
+  scientificName String?
+  defense        String?
+  locomotion     String?
+  weight         String?
+  periodo        Periodo            @relation(fields: [periodoId], references: [id])
+  favorites      Favorite[]
+  preys          PredatorRelation[] @relation("Predator")
+  predators      PredatorRelation[] @relation("Prey")
+
+  @@map("animals")
+}
+
+model PredatorRelation {
+  id         String   @id @default(uuid())
+  predatorId String
+  preyId     String
+  createdAt  DateTime @default(now())
+  predator   Animal   @relation("Predator", fields: [predatorId], references: [id])
+  prey       Animal   @relation("Prey", fields: [preyId], references: [id])
+
+  @@unique([predatorId, preyId])
+  @@map("predator_relations")
+}
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String
+  animalId   String
+  created_at DateTime @default(now())
+  animal     Animal   @relation(fields: [animalId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, animalId])
+  @@map("favorites")
+}
+
+model Periodo {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  image       String?
+  eraId       String
+  era         Era      @relation(fields: [eraId], references: [id])
+  animals     Animal[]
+
+  @@map("periodos")
+}
+
+model Era {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  image       String?
+  created_at  DateTime  @default(now())
+  periodos    Periodo[]
+
+  @@map("eras")
+}
+
+model Product {
+  id          String           @id @default(uuid())
+  name        String
+  price       Float
+  description String?
+  image       String?
+  created_at  DateTime         @default(now())
+  inventory   Inventory[]
+  orderItems  OrderItem[]
+  variants    ProductVariant[]
+  items       CartItem[]
+  comments    Comment[]
+  expeditions Expedition[]
+
+  @@map("products")
+}
+
+model Cart {
+  id         String     @id @default(uuid())
+  status     String     @default("open")
+  created_at DateTime   @default(now())
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id])
+  items      CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id         String  @id @default(uuid())
+  quantity   Int
+  cart_id    String
+  product_id String
+  cart       Cart    @relation(fields: [cart_id], references: [id])
+  product    Product @relation(fields: [product_id], references: [id])
+
+  @@map("cart_items")
+}
+
+model GameResult {
+  id         String   @id @default(uuid())
+  game_id    String?
+  score      Int
+  coins      Int
+  xp         Int
+  created_at DateTime @default(now())
+  userId     String
+  game       Game?    @relation(fields: [game_id], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model QuizQuestion {
+  id         String   @id @default(uuid())
+  question   String
+  optionA    String
+  optionB    String
+  optionC    String
+  optionD    String
+  correct    String
+  difficulty String   @default("easy")
+  created_at DateTime @default(now())
+}
+
+model QuizResult {
+  id          String   @id @default(uuid())
+  userId      String
+  score       Int
+  hits        Int
+  coinsEarned Int
+  xpEarned    Int
+  created_at  DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Inventory {
+  id         String   @id @default(uuid())
+  userId     String
+  productId  String
+  quantity   Int      @default(1)
+  created_at DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Comment {
+  id         String   @id @default(uuid())
+  created_at DateTime @default(now())
+  userId     String
+  productId  String
+  rating     Int      @default(5)
+  text       String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("comments")
+}
+
+model Expedition {
+  id          String    @id @default(uuid())
+  userId      String
+  rewardXp    Int       @default(0)
+  rewardCoins Int       @default(0)
+  createdAt   DateTime  @default(now())
+  description String?
+  location    String?
+  status      String    @default("completed")
+  title       String
+  user        User      @relation(fields: [userId], references: [id])
+  products    Product[]
+}
+
+model ProductVariant {
+  id         String   @id @default(uuid())
+  productId  String
+  color      String
+  image      String?
+  stock      Int      @default(0)
+  created_at DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  total       Float
+  status      String      @default("pending")
+  created_at  DateTime    @default(now())
+  bairro      String
+  cep         String
+  cidade      String
+  complemento String?
+  estado      String
+  numero      String
+  rua         String
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
