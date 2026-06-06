@@ -4,7 +4,7 @@ import prisma from "../../prisma";
 class GetWalletController {
   async handle(req: any, res: Response) {
 
-    const userId = req.userId;
+    const userId = req.user.id;
 
     const user = await prisma.user.findUnique({
       where: {

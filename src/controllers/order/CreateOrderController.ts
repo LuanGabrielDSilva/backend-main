@@ -7,7 +7,7 @@ export class CreateOrderController {
 
     console.log("🔥 CREATE ORDER CHAMADO");
 
-    const userId = req.userId;
+    const userId = req.user.id;
 
     console.log("USER ID:", userId);
 

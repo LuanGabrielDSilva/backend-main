@@ -8,7 +8,7 @@ const expeditionRoutes = Router();
    LISTAR EXPEDIÇÕES DO USUÁRIO
 ========================= */
 expeditionRoutes.get("/", isAuthenticated, async (req, res) => {
-  const userId = req.userId;
+  const userId = req.user?.id;
 
   const expeditions = await prismaClient.expedition.findMany({
     where: {
@@ -26,7 +26,7 @@ expeditionRoutes.get("/", isAuthenticated, async (req, res) => {
    CRIAR EXPEDIÇÃO
 ========================= */
 expeditionRoutes.post("/", isAuthenticated, async (req, res) => {
-  const userId = req.userId;
+  const userId = req.user?.id;
 
   const {
     title,

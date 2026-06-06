@@ -7,7 +7,7 @@ class ListCartController {
 
     // 🧑 pega o ID do usuário autenticado
     // vindo do middleware de autenticação
-    const userId = req.userId;
+    const userId = req.user.id;
 
     // ⚙️ instancia o service responsável
     // por buscar o carrinho do usuário

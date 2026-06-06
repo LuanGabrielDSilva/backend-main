@@ -6,7 +6,7 @@ class ListFavoritesController {
   async handle(req: Request, res: Response) {
 
     // 👤 pega ID do usuário autenticado (middleware JWT/auth)
-    const userId = req.userId;
+    const userId = req.user.id;
 
     // ⚙️ service responsável por listar favoritos
     const service = new ListFavoritesService();

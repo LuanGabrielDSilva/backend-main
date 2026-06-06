@@ -5,7 +5,7 @@ class RewardCoinsController {
 
   async handle(req: any, res: Response) {
 
-    const userId = req.userId;
+    const userId = req.user.id;
 
     const { amount } = req.body;
 

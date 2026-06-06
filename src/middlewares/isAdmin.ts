@@ -7,7 +7,7 @@ export async function isAdmin(
   next: NextFunction
 ) {
   try {
-    const userId = req.userId;
+    const userId = req.user.id;
 
     // 🔒 verifica se veio userId
     if (!userId) {

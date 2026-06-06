@@ -1,33 +1,25 @@
 import prismaClient from "../../prisma";
 
 class GetAnimalFoodChainService {
-
   async execute(animalId: string) {
 
-    const animal =
-      await prismaClient.animal.findUnique({
+    const animal = await prismaClient.animal.findUnique({
+      where: { id: animalId },
 
-        where: {
-          id: animalId
+      include: {
+        preys: {
+          include: {
+            prey: true, // vem do PredatorRelation
+          },
         },
 
-        include: {
-
-          preyRelations: {
-            include: {
-              prey: true
-            }
+        predators: {
+          include: {
+            predator: true, // vem do PredatorRelation
           },
-
-          predatorRelations: {
-            include: {
-              predator: true
-            }
-          }
-
-        }
-
-      });
+        },
+      },
+    });
 
     return animal;
   }

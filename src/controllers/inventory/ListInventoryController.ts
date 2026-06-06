@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../../database/prisma";
+import prisma from "../../database/prisma";
 
 export class ListProductsController {
   async handle(req: Request, res: Response) {

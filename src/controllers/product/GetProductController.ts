@@ -9,10 +9,6 @@ class GetProductController {
 
     const product = await prismaClient.product.findUnique({
       where: { id },
-
-      include: {
-        colors: true
-      }
     });
 
     if (!product) {

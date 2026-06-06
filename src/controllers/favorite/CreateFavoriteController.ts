@@ -10,7 +10,7 @@ class CreateFavoriteController {
 
     // 👤 pega ID do usuário autenticado
     // vindo do middleware JWT/auth
-    const userId = req.userId;
+    const userId = req.user.id;
 
     // ⚙️ instancia o service responsável
     // por criar favorito

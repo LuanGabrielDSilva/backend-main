@@ -9,7 +9,7 @@ class DeleteFavoriteController {
     const { animalId } = req.body;
 
     // 👤 usuário autenticado (via middleware)
-    const userId = req.userId;
+    const userId = req.user.id;
 
     // ⚙️ service responsável por remover favorito
     const service = new DeleteFavoriteService();

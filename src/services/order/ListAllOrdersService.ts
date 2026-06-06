@@ -1,16 +1,35 @@
 import prismaClient from "../../prisma";
 
+interface ListOrdersRequest {
+  userId: string;
+  isAdmin?: boolean;
+}
+
 class ListAllOrdersService {
-  async execute() {
+  async execute({ userId, isAdmin = false }: ListOrdersRequest) {
     const orders = await prismaClient.order.findMany({
+      where: isAdmin ? {} : { userId },
       orderBy: {
         created_at: "desc"
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
         items: {
           include: {
-            product: true
+            product: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+                price: true
+              }
+            }
           }
         }
       }

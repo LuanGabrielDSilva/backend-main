@@ -1,41 +1,60 @@
-import {NextFunction, Request, Response} from 'express'
-import { verify } from 'jsonwebtoken'
+/// <reference path="../types.d.ts" />
 
-interface Payload{
+import { NextFunction, Request, Response } from "express";
+import { verify } from "jsonwebtoken";
+import prismaClient from "../prisma";
+
+interface Payload {
   sub: string;
 }
 
-export function isAuthenticated(
+export async function isAuthenticated(
   req: Request,
   res: Response,
   next: NextFunction
-){
+) {
+  try {
+    // 📥 pega o header
+    const authToken = req.headers.authorization;
 
-  // Receber o token
-  const authToken = req.headers.authorization;
+    if (!authToken) {
+      return res.status(401).json({ error: "Token não informado" });
+    }
 
-  if(!authToken){
-    return res.status(401).end();
-  }
+    // 🔪 separa "Bearer token"
+    const [, token] = authToken.split(" ");
 
-  const [, token] = authToken.split(" ")
+    if (!token) {
+      return res.status(401).json({ error: "Token inválido" });
+    }
 
-  try{
-
-    //Validar esse token.
+    // 🔐 valida JWT
     const { sub } = verify(
       token,
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET as string
     ) as Payload;
 
-    //Recuperar o id do token e colocar dentro de uma variavel userId dentro do req.
-    req.userId = sub;
-    
+    // 🧠 busca usuário no banco
+    const user = await prismaClient.user.findUnique({
+      where: { id: sub },
+      select: {
+        id: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: "Usuário inválido" });
+    }
+
+    // 💾 injeta no request
+    req.user = {
+      id: user.id,
+      role: user.role,
+    };
+
     return next();
-
-  }catch(err){
-
-    return res.status(401).end();
+  } catch (err) {
+    return res.status(401).json({ error: "Token inválido" });
   }
-
 }

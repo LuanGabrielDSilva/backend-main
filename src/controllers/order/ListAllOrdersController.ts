@@ -1,31 +1,48 @@
 import { Request, Response } from "express";
 import prismaClient from "../../prisma";
 
-export class ListOrdersController {
-
+export class ListAllOrdersController {
   async handle(req: Request, res: Response) {
+    try {
+      const userRole = (req as any).userRole;
 
-    // 📦 busca todos os pedidos no banco
-    const orders = await prismaClient.order.findMany({
-
-      // 🔗 inclui dados do usuário e itens do pedido
-      include: {
-        user: true,
-        items: {
-          include: {
-            product: true
-          }
-        }
-      },
-
-      // 📅 ordena do mais recente para o mais antigo
-      orderBy: {
-        created_at: "desc"
+      if (userRole !== "admin") {
+        return res.status(403).json({ error: "Acesso negado" });
       }
 
-    });
+      const orders = await prismaClient.order.findMany({
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          },
+          items: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                  price: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          created_at: "desc"
+        }
+      });
 
-    // 📤 retorna lista de pedidos completos
-    return res.json(orders);
+      return res.json(orders);
+    } catch (error) {
+      console.error("Erro ao listar todos pedidos:", error);
+      return res.status(500).json({
+        error: "Erro ao buscar pedidos"
+      });
+    }
   }
 }

@@ -17,7 +17,7 @@ class CreateCommentController {
 
     // 👤 usuário autenticado
     // vindo do middleware JWT/auth
-    const userId = req.userId;
+    const userId = req.user.id;
 
     // 🧠 cria comentário no banco
     const comment = await prismaClient.comment.create({

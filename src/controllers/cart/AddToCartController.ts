@@ -9,7 +9,7 @@ class AddToCartController {
 
     // 🔐 pega o ID do usuário autenticado
     // normalmente vem do middleware JWT
-    const userId = req.userId;
+    const userId = req.user.id;
 
     // 📦 dados enviados pelo frontend
     const { product_id, quantity } = req.body;
