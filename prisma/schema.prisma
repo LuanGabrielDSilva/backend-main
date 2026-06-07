@@ -39,6 +39,21 @@ model User {
   @@map("users")
 }
 
+model Address {
+  id        String @id @default(uuid())
+  userId    String
+
+  rua       String
+  numero    String
+  bairro    String
+  cidade    String
+  estado    String
+  cep       String
+  complemento String?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
 model Transaction {
   id         String   @id @default(uuid())
   userId     String

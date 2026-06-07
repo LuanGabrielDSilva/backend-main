@@ -14,19 +14,15 @@ interface Request {
 }
 
 export class CreateOrderService {
-
   async execute({
     userId,
-
     cep,
     rua,
     numero,
     bairro,
     cidade,
     estado,
-
     complemento
-
   }: Request) {
 
     console.log("🔥 CREATE ORDER FOI CHAMADO", userId);
@@ -34,12 +30,8 @@ export class CreateOrderService {
     /* =========================
        BUSCAR CARRINHO
     ========================= */
-
     const cart = await prismaClient.cart.findFirst({
-      where: {
-        userId
-      },
-
+      where: { userId },
       include: {
         items: {
           include: {
@@ -49,8 +41,7 @@ export class CreateOrderService {
       }
     });
 
-    console.log("🛒 CART ENCONTRADO:");
-    console.log(JSON.stringify(cart, null, 2));
+    console.log("🛒 CART ENCONTRADO:", JSON.stringify(cart, null, 2));
 
     if (!cart || cart.items.length === 0) {
       throw new Error("Carrinho vazio");
@@ -59,7 +50,6 @@ export class CreateOrderService {
     /* =========================
        CALCULAR TOTAL
     ========================= */
-
     const total = cart.items.reduce((acc, item) => {
       return acc + item.quantity * item.product.price;
     }, 0);
@@ -67,11 +57,8 @@ export class CreateOrderService {
     /* =========================
        BUSCAR USUÁRIO
     ========================= */
-
     const user = await prismaClient.user.findUnique({
-      where: {
-        id: userId
-      }
+      where: { id: userId }
     });
 
     if (!user) {
@@ -81,7 +68,6 @@ export class CreateOrderService {
     /* =========================
        VERIFICAR SALDO
     ========================= */
-
     if (user.balance < total) {
       throw new Error("Saldo insuficiente");
     }
@@ -89,12 +75,8 @@ export class CreateOrderService {
     /* =========================
        DESCONTAR SALDO
     ========================= */
-
     await prismaClient.user.update({
-      where: {
-        id: userId
-      },
-
+      where: { id: userId },
       data: {
         balance: {
           decrement: total
@@ -105,24 +87,11 @@ export class CreateOrderService {
     /* =========================
        CRIAR PEDIDO
     ========================= */
-
     const order = await prismaClient.order.create({
-
       data: {
-
-        /* =========================
-           RELAÇÃO USUÁRIO
-        ========================= */
-
         user: {
-          connect: {
-            id: userId
-          }
+          connect: { id: userId }
         },
-
-        /* =========================
-           DADOS PEDIDO
-        ========================= */
 
         total,
         status: "pending",
@@ -130,7 +99,6 @@ export class CreateOrderService {
         /* =========================
            ENDEREÇO
         ========================= */
-
         cep,
         rua,
         numero,
@@ -142,7 +110,6 @@ export class CreateOrderService {
         /* =========================
            ITENS
         ========================= */
-
         items: {
           create: cart.items.map(item => ({
             productId: item.product.id,
@@ -150,25 +117,21 @@ export class CreateOrderService {
             price: item.product.price
           }))
         }
-
       },
 
       include: {
         user: true,
-
         items: {
           include: {
             product: true
           }
         }
       }
-
     });
 
     /* =========================
        LIMPAR CARRINHO
     ========================= */
-
     await prismaClient.cartItem.deleteMany({
       where: {
         cart_id: cart.id
