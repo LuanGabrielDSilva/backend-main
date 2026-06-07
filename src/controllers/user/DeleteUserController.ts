@@ -9,7 +9,7 @@ class DeleteUserController {
 
     const result = await service.execute(id);
 
-    return res.json({ teste: "DELETE FUNCIONANDO" });
+    return res.json(result);
   }
 }
 
