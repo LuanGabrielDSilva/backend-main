@@ -8,15 +8,15 @@ datasource db {
 }
 
 model User {
-  id                  String        @id @default(uuid())
+  id                  String            @id @default(uuid())
   name                String
-  email               String        @unique
+  email               String            @unique
   password            String
-  created_at          DateTime?     @default(now())
-  updated_at          DateTime?     @default(now())
-  role                String        @default("user")
-  balance             Float         @default(0)
-  coins               Int           @default(0)
+  created_at          DateTime?         @default(now())
+  updated_at          DateTime?         @default(now())
+  role                String            @default("user")
+  balance             Float             @default(0)
+  coins               Int               @default(0)
   bairro              String?
   cep                 String?
   cidade              String?
@@ -35,20 +35,22 @@ model User {
   carts               Cart[]
   comments            Comment[]
   favorites           Favorite[]
+  addresses           Address[]
+  userAchievements    UserAchievement[]
 
   @@map("users")
 }
 
 model Address {
-  id        String @id @default(uuid())
-  userId    String
+  id     String @id @default(uuid())
+  userId String
 
-  rua       String
-  numero    String
-  bairro    String
-  cidade    String
-  estado    String
-  cep       String
+  rua         String
+  numero      String
+  bairro      String
+  cidade      String
+  estado      String
+  cep         String
   complemento String?
 
   user User @relation(fields: [userId], references: [id])
@@ -292,4 +294,25 @@ model OrderItem {
   price     Float
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
+}
+
+model Achievement {
+  id          String @id
+  name        String
+  description String
+  rewardCoins Int
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
 }

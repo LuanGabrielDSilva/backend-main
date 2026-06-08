@@ -14,8 +14,6 @@ import { AuthUserController } from "./controllers/user/AuthUserController";
 import { DetailuserController } from "./controllers/user/DetailUserController";
 import { ListUserController } from "./controllers/user/ListUserController";
 import { DeleteUserController } from "./controllers/user/DeleteUserController";
-
-// ✅ NOVO CONTROLLER (substituindo o antigo)
 import { EditUserController } from "./controllers/user/EditUserController";
 
 /* =========================================================
@@ -25,9 +23,14 @@ import { CreateFavoriteController } from "./controllers/favorite/CreateFavoriteC
 import { ListFavoritesController } from "./controllers/favorite/ListFavoritesController";
 import { DeleteFavoriteController } from "./controllers/favorite/DeleteFavoriteController";
 
+/*===================================
+   COMENTARIOS
+=====================================*/
 import { UploadController } from "./controllers/upload/UploadController";
 import { ListCommentsController } from "./controllers/comment/ListCommentsController";
 import { CreateCommentController } from "./controllers/comment/CreateCommentController";
+import { ListAllCommentsController } from "./controllers/comment/ListAllCommentsController";
+import { DeleteCommentController } from "./controllers/comment/DeleteCommentController";
 
 import animalRoutes from "./routes/animal.routes";
 import cartRoutes from "./routes/cart.routes";
@@ -84,6 +87,7 @@ router.use("/quiz", quizRoutes);
 router.use("/cart", cartRoutes);
 router.use("/auth", authRoutes);
 
+
 router.get("/products/:id/comments", new ListCommentsController().handle);
 router.post("/products/:id/comments", isAuthenticated, new CreateCommentController().handle);
 
@@ -92,6 +96,8 @@ router.post("/upload", upload.single("file"), new UploadController().handle);
 router.post("/favorites", isAuthenticated, new CreateFavoriteController().handle);
 router.get("/favorites", isAuthenticated, new ListFavoritesController().handle);
 router.delete("/favorites", isAuthenticated, new DeleteFavoriteController().handle);
+router.get("/admin/comments", isAuthenticated, new ListAllCommentsController().handle);
+router.delete("/admin/comments/:id", isAuthenticated, new DeleteCommentController().handle);
 
 router.use("/products", productRoutes);
 router.use("/expeditions", expeditionRoutes);
@@ -106,6 +112,8 @@ router.get("/admin/stats", async (req, res) => {
   const animals = await prismaClient.animal.count();
 
   return res.json({ users, eras, animals });
+
+  
 });
 
 export { router };
